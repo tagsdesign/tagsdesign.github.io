@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../style.css" type="text/css" media="all" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta property="og:title" content="Ore Deposit by tagsdesign | Ads | APP">
+    <meta property="og:description" content="Welcome, I'm tagsdesign. Download the latest 1.20 Ore deposits by tagsdesign.">
+    <meta property="og:image" content="icon.png">
+    <meta property="og:url" content="https://tagsdesign.github.io">
+    <meta name="theme-color" content="#000000">
+  <title>Ore Deposit by tagsdesign | Ads Loading | APP</title>
+</head>
+<body>
+  <div class="main">
+    <div class="ads">
+      
+    </div>
+    <div class="ads">
+      
+    </div>
+    <div id="oredepo-countdown" class="oredepo-loading desc-sized"></div>
+    <a href="oredepo.download.html">
+    <button id="oredepo-dlbutton" style="display: none;" class="oredepo-loading-done name-sized">Download</button>
+    </a>
+    
+    <div class="ads">
+      
+    </div>
+    <div class="ads">
+      
+    </div>
+    <div class="ads">
+      
+    </div>
+    <div class="ads">
+      
+    </div>
+    <div class="ads">
+      
+    </div>
+  </div>
+  <script>
+    let countdownTime = 15;
+    let countdownElement = document.getElementById('oredepo-countdown');
+    let buttonElement = document.getElementById('oredepo-dlbutton');
+    function countdown() {
+      countdownElement.innerText = `Download in: ${countdownTime} seconds`;
+      countdownTime--;
+      if (countdownTime < 0) {
+      countdownElement.style.display = 'none';
+      buttonElement.style.display = 'block';
+      } else {
+        setTimeout(countdown, 1000);
+      }
+    }
+    countdown();
+  </script>
+</body>
+</html>

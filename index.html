@@ -299,23 +299,57 @@ const credit = document.getElementById("credit");
 
 let started = false;
 let mediaPairs = [];
+let waitTimer;
+
+video.addEventListener("error", () => {
+    console.error("VIDEO ERROR:", video.error);
+});
+
+video.addEventListener("loadedmetadata", () => {
+    console.log("VIDEO METADATA:", {
+        source: video.currentSrc,
+        width: video.videoWidth,
+        height: video.videoHeight,
+        duration: video.duration
+    });
+});
+
+video.addEventListener("loadeddata", () => {
+    console.log("VIDEO DATA LOADED");
+});
+
+video.addEventListener("canplay", () => {
+    console.log("VIDEO CAN PLAY");
+});
+
+video.addEventListener("playing", () => {
+    console.log("VIDEO PLAYING");
+});
+
+audio.addEventListener("error", () => {
+    console.error("AUDIO ERROR:", audio.error);
+});
 
 async function scanMedia() {
-
     if (mediaPairs.length) return;
 
     for (let i = 1; i <= 6; i++) {
+        const bg = `videos.mp4s/bg${i}.mp4`;
+        const music = `videos.mp4s/audio${i}.mp3`;
 
-        const bg = `/videos.mp4s/bg${i}.mp4`;
-        const music = `/videos.mp4s/audio${i}.mp3`;
+        const videoExists = await fetch(bg, {
+            method: "HEAD",
+            cache: "no-store"
+        })
+        .then(r => r.ok)
+        .catch(() => false);
 
-        const videoExists = await fetch(bg, { method: "HEAD" })
-            .then(r => r.ok)
-            .catch(() => false);
-
-        const audioExists = await fetch(music, { method: "HEAD" })
-            .then(r => r.ok)
-            .catch(() => false);
+        const audioExists = await fetch(music, {
+            method: "HEAD",
+            cache: "no-store"
+        })
+        .then(r => r.ok)
+        .catch(() => false);
 
         if (videoExists && audioExists) {
             mediaPairs.push({
@@ -326,20 +360,22 @@ async function scanMedia() {
     }
 
     if (!mediaPairs.length) {
-        alert("No bgX.mp4/audioX.m4a files found.");
+        console.error("No media files found.");
     }
 }
 
 async function startExperience() {
-
     if (started) return;
-    started = true;
 
+    started = true;
     clearTimeout(waitTimer);
 
     await scanMedia();
 
-    if (!mediaPairs.length) return;
+    if (!mediaPairs.length) {
+        started = false;
+        return;
+    }
 
     const random =
         mediaPairs[Math.floor(Math.random() * mediaPairs.length)];
@@ -357,46 +393,47 @@ async function startExperience() {
     audio.currentTime = 0;
 
     try {
-
-        await Promise.all([
-            video.play(),
-            audio.play()
-        ]);
-
-        audio.currentTime = video.currentTime;
-
+        await video.play();
+        console.log("VIDEO PLAY SUCCESS");
     } catch (err) {
+        console.error("VIDEO PLAY FAILED:", err);
+    }
 
-        console.log(err);
+    try {
+        await audio.play();
+        console.log("AUDIO PLAY SUCCESS");
+    } catch (err) {
+        console.error("AUDIO PLAY FAILED:", err);
+    }
 
+    if (!video.paused && !audio.paused) {
+        audio.currentTime = video.currentTime;
     }
 }
 
 document.addEventListener("click", startExperience, { once: true });
 document.addEventListener("touchstart", startExperience, { once: true });
 
-const waitTimer = setTimeout(startExperience, 5000);
+waitTimer = setTimeout(startExperience, 5000);
 
 setInterval(() => {
-
     if (video.paused || audio.paused) return;
 
-    const drift = Math.abs(video.currentTime - audio.currentTime);
+    const drift = Math.abs(
+        video.currentTime - audio.currentTime
+    );
 
     if (drift > 0.03) {
         audio.currentTime = video.currentTime;
     }
-
 }, 30);
 
 video.addEventListener("ended", () => {
-
     video.currentTime = 0;
     audio.currentTime = 0;
 
-    video.play();
-    audio.play();
-
+    video.play().catch(() => {});
+    audio.play().catch(() => {});
 });
 
 function updateScrollEffect() {
@@ -412,13 +449,27 @@ function updateScrollEffect() {
     card.style.transform = `translateY(${cardOffset}px)`;
 }
 
-window.addEventListener("scroll", updateScrollEffect, { passive: true });
-window.addEventListener("resize", updateScrollEffect);
+window.addEventListener(
+    "scroll",
+    updateScrollEffect,
+    { passive: true }
+);
+
+window.addEventListener(
+    "resize",
+    updateScrollEffect
+);
 
 function flickerCredit() {
-    const nextOpacity = Math.random() > 0.7 ? 0.9 : 0.7;
+    const nextOpacity =
+        Math.random() > 0.7 ? 0.9 : 0.7;
+
     credit.style.opacity = nextOpacity;
-    setTimeout(flickerCredit, 900 + Math.random() * 1100);
+
+    setTimeout(
+        flickerCredit,
+        900 + Math.random() * 1100
+    );
 }
 
 window.addEventListener("load", () => {
